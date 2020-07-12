@@ -1,6 +1,4 @@
 from Collector import Collector
-import datetime as dt
-import jpholiday as jp
 
 
 def collect_stock():
