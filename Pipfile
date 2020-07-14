@@ -15,6 +15,7 @@ sklearn = "*"
 requests = "*"
 bs4 = "*"
 jpholiday = "*"
+pandas-gbq = "*"
 
 [requires]
 python_version = "3.7"
