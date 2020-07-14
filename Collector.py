@@ -44,7 +44,8 @@ class Collector:
         exit_when_already_exist(self.date)
 
         # collect(extract) stock data for ETL
-        df_scrape = self.__collect_stock_data()
+        tmp_folder_path = './Lake/tmp/'
+        df_scrape = self.__collect_stock_data(tmp_folder_path=tmp_folder_path)
 
         # transform for ETL
         df_scrape = self.__transform_df(df_scrape)
@@ -53,12 +54,12 @@ class Collector:
         self.__save_stock_df(df_scrape)
 
         # remove temporary saving folder
-        shutil.rmtree('./Lake/tmp/')
+        shutil.rmtree(tmp_folder_path)
 
         self.daily_data = df_scrape
         return df_scrape
 
-    def __collect_stock_data(self):
+    def __collect_stock_data(self, tmp_folder_path):
         """
 
         :return: (DataFrame)
@@ -78,14 +79,14 @@ class Collector:
             except Exception as e:
                 print("couldn't get max page index for", e)
 
-        tmp_file = './Lake/tmp/{}.txt'.format(self.date)
+        tmp_file = tmp_folder_path + '{}.txt'.format(self.date)
         if os.path.exists(tmp_file):
             with open(tmp_file) as f:
                 past_progress_page = f.read()
                 past_num = int(re.match('scraping page (\d+)/\d+', past_progress_page)[1]) + 1
-                df = pd.read_csv('./Lake/tmp/{}.csv'.format(self.date))
+                df = pd.read_csv(tmp_folder_path + '{}.csv'.format(self.date))
         else:
-            os.mkdir('./Lake/tmp')
+            os.mkdir(tmp_folder_path)
             past_num = 1
             df = pd.DataFrame()
 
@@ -99,7 +100,7 @@ class Collector:
             df = pd.concat([df, row_df[['コード', '取引値.1', '出来高']]])
             del row_df
             # temporary save
-            df.to_csv("./Lake/tmp/{}.csv".format(self.date), index=False)
+            df.to_csv(tmp_folder_path + "{}.csv".format(self.date), index=False)
             with open(tmp_file, mode='w') as f:
                 f.write(scraping_progress_str)
             time.sleep(random.randint(30, 60))
