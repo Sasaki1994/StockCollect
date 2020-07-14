@@ -2,7 +2,7 @@ from Collector import Collector
 
 
 def collect_stock():
-    collector = Collector()
+    collector = Collector(save_folder="./Lake/")
     collector.collect_daily_data()
 
 
