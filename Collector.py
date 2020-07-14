@@ -32,25 +32,33 @@ class Collector:
             self.date = '{}-{}-{}'.format(year, month, day)
             return self.date
 
-        # get date information
+        def exit_when_already_exist(date):
+            if os.path.exists("./Lake/{}.csv".format(date)):
+                print("data has been already saved.")
+                sys.exit(0)
+
+        # setting collecting data date
         get_date()
-        saving_filename = "./Lake/{}.csv".format(self.date)
-        if os.path.exists(saving_filename):
-            sys.exit(0)
 
-        df_scrape = self.__scrape()
+        # judge whether already collected or not
+        exit_when_already_exist(self.date)
 
-        # processing briefly
-        df_scrape.rename(columns={'コード': "code", '取引値.1': "{}_close".format(self.date), '出来高': "{}_volume".format(self.date)}, inplace=True)
-        df_scrape = df_scrape.astype(float)
-        df_scrape['code'] = df_scrape.astype(int)
+        # collect(extract) stock data for ETL
+        df_scrape = self.__collect_stock_data()
 
-        df_scrape.to_csv(saving_filename, index=False)
+        # transform for ETL
+        df_scrape = self.__transform_df(df_scrape)
+
+        # save data and loading to BigQuery for ETL
+        self.__save_stock_df(df_scrape)
+
+        # remove temporary saving folder
         shutil.rmtree('./Lake/tmp/')
+
         self.daily_data = df_scrape
         return df_scrape
 
-    def __scrape(self):
+    def __collect_stock_data(self):
         """
 
         :return: (DataFrame)
@@ -97,4 +105,16 @@ class Collector:
             time.sleep(random.randint(30, 60))
         df.reset_index(drop=True, inplace=True)
         return df
+
+    def __transform_df(self, df):
+        df.rename(
+            columns={'コード': "code", '取引値.1': "{}_close".format(self.date), '出来高': "{}_volume".format(self.date)},
+            inplace=True)
+        df = df.astype(float)
+        df['code'] = df.astype(int)
+        return df
+
+    def __save_stock_df(self, df):
+        saving_filename = "./Lake/{}.csv".format(self.date)
+        df.to_csv(saving_filename, index=False)
 
