@@ -9,10 +9,11 @@ import os
 import shutil
 import sys
 import glob
+from google.oauth2 import service_account
 
 
 class Collector:
-    def __init__(self, save_folder):
+    def __init__(self, save_folder, g_credential):
         if not re.match(".*/$", save_folder):
             raise Exception('require param `save_folder` be finished with `/` ')
         self.daily_data = None
@@ -22,6 +23,7 @@ class Collector:
         self.save_folder = save_folder
         self.save_filename = "{}.csv".format(self.date)
         self.tmp_folder = save_folder + 'tmp/'
+        self.g_cred = g_credential
 
     def __get_date(self):
         """
@@ -131,11 +133,15 @@ class Collector:
 
     def __save_stock_df(self, df):
         df.to_csv(self.save_folder + self.save_filename, index=False)
-        gbq.to_gbq(df, 'stocks.sandbox_stocks', 'static-destiny-245310', if_exists='append')
+        gbq.to_gbq(df, 'stocks.sandbox_stocks', if_exists='append', credentials=self.g_cred)
 
 
 if __name__ == '__main__':
     # Lake -> BigQuery program
+    # implement below
+    cred_json = ''
+
+    g_cred = service_account.Credentials.from_service_account_file(cred_json)
     tmp_folder_path = './Lake/'
     stock_data_list = glob.glob(tmp_folder_path + "/*")
     df = pd.DataFrame()
@@ -148,5 +154,5 @@ if __name__ == '__main__':
         df_a['date'] = date
         df = pd.concat([df, df_a])
     # for fail safe, code below is commented out
-    # gbq.to_gbq(df, 'stocks.collect_stocks', 'static-destiny-245310', if_exists='replace')
+    # gbq.to_gbq(df, 'stocks.demo_stocks', if_exists='replace', credentials=g_cred)
 
