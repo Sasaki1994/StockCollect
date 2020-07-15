@@ -133,7 +133,7 @@ class Collector:
 
     def __save_stock_df(self, df):
         df.to_csv(self.save_folder + self.save_filename, index=False)
-        gbq.to_gbq(df, 'stocks.sandbox_stocks', if_exists='append', credentials=self.g_cred)
+        gbq.to_gbq(df, 'stocks.collect_stocks', if_exists='append', credentials=self.g_cred)
 
 
 if __name__ == '__main__':
