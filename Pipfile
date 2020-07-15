@@ -8,14 +8,12 @@ verify_ssl = true
 [packages]
 pandas = "*"
 lxml = "*"
-xgboost = "*"
 matplotlib = "*"
 numpy = "*"
-sklearn = "*"
 requests = "*"
 bs4 = "*"
-jpholiday = "*"
 pandas-gbq = "*"
+google-auth = "*"
 
 [requires]
 python_version = "3.7"
